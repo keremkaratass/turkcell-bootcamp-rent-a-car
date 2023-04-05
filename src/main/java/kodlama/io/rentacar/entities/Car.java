@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
@@ -20,9 +22,15 @@ public class Car {
     private int modelYear;
     private String plate;
     private double dailyPrice;
+
     @Enumerated(EnumType.STRING)
     private State state; // ! Available  Rented  Maintance
+
     @ManyToOne
+    @JoinColumn(name = "model_id")
   //  @JsonManagedReference
     private Model model;
+
+    @OneToMany(mappedBy = "car")
+    private List<Maintenance> maintenances;
 }

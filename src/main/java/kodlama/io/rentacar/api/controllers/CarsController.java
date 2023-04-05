@@ -21,8 +21,8 @@ public class CarsController {
     private final CarService service;
 
     @GetMapping
-    public List<GetAllCarsResponse> getAll() {
-        return service.getAll();
+    public List<GetAllCarsResponse> getAll(@RequestParam(defaultValue = "true") boolean showMaintenance) {
+        return service.getAll(showMaintenance);
     }
 
     @GetMapping("/{id}")

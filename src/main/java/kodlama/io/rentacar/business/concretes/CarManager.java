@@ -8,11 +8,13 @@ import kodlama.io.rentacar.business.dto.responses.get.GetAllCarsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateCarResponse;
 import kodlama.io.rentacar.entities.Car;
+import kodlama.io.rentacar.entities.enums.State;
 import kodlama.io.rentacar.repository.CarRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 @AllArgsConstructor
@@ -21,11 +23,12 @@ public class CarManager implements CarService {
     private final ModelMapper mapper;
 
     @Override
-    public List<GetAllCarsResponse> getAll() {
+    public List<GetAllCarsResponse> getAll(boolean showMaintenance) {
         List<Car> cars = repository.findAll();
+        cars= checkIfWithoutMaintenanceIsTrue(cars,showMaintenance);
         List<GetAllCarsResponse> response = cars
                 .stream()//map diye bir fonksiyon kullanmamızı sağlıyor
-                .map(car -> mapper.map(car, GetAllCarsResponse.class))
+                .map(car ->  mapper.map(car, GetAllCarsResponse.class))
                 .toList();
 
         return response;
@@ -49,6 +52,7 @@ public class CarManager implements CarService {
 
     @Override
     public UpdateCarResponse update(int id, UpdateCarRequest request) {
+
         Car car = mapper.map(request, Car.class);
         car.setId(id);
         repository.save(car);
@@ -61,4 +65,25 @@ public class CarManager implements CarService {
         repository.deleteById(id);
 
     }
+
+    private  List<Car> checkIfWithoutMaintenanceIsTrue(List<Car> cars, boolean isMaintenance) {
+        List<Car> cars1 = new ArrayList<>();
+        for (Car car:cars) {
+            cars1.add(car);
+        }
+        if (isMaintenance) {
+            for (Car car : cars) {
+                if (car.getState() == State.MAINTENANCE) {
+                    cars1.remove(car);
+                }
+            }
+        }
+        return cars1;
+    }
+
+
+
+
+
+
 }

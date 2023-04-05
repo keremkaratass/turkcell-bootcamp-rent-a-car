@@ -11,14 +11,13 @@ import kodlama.io.rentacar.entities.Model;
 import kodlama.io.rentacar.repository.ModelRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
 @AllArgsConstructor
 public class ModelManager implements ModelService {
-    @Autowired
+
     private final ModelRepository repository;
     private final ModelMapper mapper;
 
@@ -37,7 +36,6 @@ public class ModelManager implements ModelService {
     public GetModelResponse getById(int id) {
         Model model = repository.findById(id).orElseThrow();
         GetModelResponse response = mapper.map(model, GetModelResponse.class);
-
         return response;
     }
 
@@ -61,6 +59,6 @@ public class ModelManager implements ModelService {
 
     @Override
     public void delete(int id) {
-
+        repository.deleteById(id);
     }
 }

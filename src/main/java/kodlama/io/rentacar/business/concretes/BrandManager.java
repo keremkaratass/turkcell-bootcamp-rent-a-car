@@ -49,7 +49,7 @@ public class BrandManager implements BrandService {
         response.setId(brand.getId());
         response.setName(brand.getName());*/
         Brand brand = mapper.map(request, Brand.class);
-        brand.setId(0); //işimizi sağlama alan yer.
+        brand.setId(0); //işimizi sağlama alan yer. insert yapar.
         repository.save(brand);
         CreateBrandResponse response = mapper.map(brand, CreateBrandResponse.class);
 
