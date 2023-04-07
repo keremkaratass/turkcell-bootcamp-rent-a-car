@@ -28,7 +28,6 @@ public class Car {
 
     @ManyToOne
     @JoinColumn(name = "model_id")
-  //  @JsonManagedReference
     private Model model;
 
     @OneToMany(mappedBy = "car")

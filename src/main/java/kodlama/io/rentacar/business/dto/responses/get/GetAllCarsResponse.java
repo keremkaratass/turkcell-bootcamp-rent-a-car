@@ -17,4 +17,6 @@ public class GetAllCarsResponse {
     private String plate;
     private double dailyPrice;
     private State state;
+    //    private String modelName; mesela response'da modelin ismini istersem böyle
+    //    private String modelBrandName; mesela response'da modelin marka ismini istersem böyle
 }

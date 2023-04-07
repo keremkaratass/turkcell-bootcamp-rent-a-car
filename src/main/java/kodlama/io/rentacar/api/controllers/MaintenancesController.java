@@ -28,19 +28,26 @@ public class MaintenancesController {
     public GetMaintenanceResponse getById(@PathVariable int id){
         return service.getById(id);
     }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateMaintenanceResponse add(@RequestBody CreateMaintenanceRequest request){
+        return service.add(request);
+    }
+
+    @PutMapping("/return/{carId}")
+    public GetMaintenanceResponse returnCarFromMaintenance(@PathVariable int carId) {
+        return service.returnCarFromMaintenance(carId);
+    }
+
     @PutMapping("/{id}")
-    public UpdateMaintenanceResponse update(@PathVariable int id, @RequestBody UpdateMaintenanceRequest maintenanceRequest){
-        return service.update(id, maintenanceRequest);
+    public UpdateMaintenanceResponse update(@PathVariable int id, @RequestBody UpdateMaintenanceRequest request){
+        return service.update(id, request);
     }
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int id){
         service.delete(id);
     }
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CreateMaintenanceResponse add(@RequestBody CreateMaintenanceRequest maintenanceRequest){
-        return service.add(maintenanceRequest);
-    }
+
 
 }

@@ -14,8 +14,8 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class CarManager implements CarService {
@@ -23,20 +23,22 @@ public class CarManager implements CarService {
     private final ModelMapper mapper;
 
     @Override
-    public List<GetAllCarsResponse> getAll(boolean showMaintenance) {
-        List<Car> cars = repository.findAll();
-        cars= checkIfWithoutMaintenanceIsTrue(cars,showMaintenance);
+    public List<GetAllCarsResponse> getAll(boolean includeMaintenance) {
+        List<Car> cars = filterCarsByMaintenanceState(includeMaintenance);
         List<GetAllCarsResponse> response = cars
-                .stream()//map diye bir fonksiyon kullanmamızı sağlıyor
-                .map(car ->  mapper.map(car, GetAllCarsResponse.class))
+                .stream()
+                .map(car -> mapper.map(car, GetAllCarsResponse.class))
                 .toList();
 
         return response;
     }
+
     @Override
     public GetCarResponse getById(int id) {
+        checkIfExistsById(id);
         Car car = repository.findById(id).orElseThrow();
         GetCarResponse response = mapper.map(car, GetCarResponse.class);
+
         return response;
     }
 
@@ -45,45 +47,57 @@ public class CarManager implements CarService {
         Car car = mapper.map(request, Car.class);
         //requestteki bilgileri brand classına  dönüştür ***newlemedik
         car.setId(0); //başka id lerle karıştırmasın
+        car.setState(State.AVAILABLE);
         repository.save(car);
         CreateCarResponse response = mapper.map(car, CreateCarResponse.class);
+
         return response;
     }
 
     @Override
     public UpdateCarResponse update(int id, UpdateCarRequest request) {
-
+        checkIfExistsById(id);
         Car car = mapper.map(request, Car.class);
         car.setId(id);
         repository.save(car);
         UpdateCarResponse response = mapper.map(car, UpdateCarResponse.class);
+
         return response;
     }
 
     @Override
     public void delete(int id) {
+        checkIfExistsById(id);
         repository.deleteById(id);
 
     }
 
-    private  List<Car> checkIfWithoutMaintenanceIsTrue(List<Car> cars, boolean isMaintenance) {
-        List<Car> cars1 = new ArrayList<>();
-        for (Car car:cars) {
-            cars1.add(car);
+    @Override
+    public void changeState(int carId, State state) {
+        Car car = repository.findById(carId).orElseThrow();
+        car.setState(state);
+        repository.save(car);
+    }
+
+    private void checkIfExistsById(int id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Böyle bir araç bulunamadı!");
         }
-        if (isMaintenance) {
-            for (Car car : cars) {
-                if (car.getState() == State.MAINTENANCE) {
-                    cars1.remove(car);
-                }
-            }
+    }
+
+    private List<Car> filterCarsByMaintenanceState(boolean includeMaintenance) {
+        if (includeMaintenance) {
+            return repository.findAll();
         }
-        return cars1;
+
+        return repository.findAllByStateIsNot(State.MAINTENANCE);
     }
 
 
-
-
-
-
 }
+
+
+
+
+
+
