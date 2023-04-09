@@ -1,4 +1,4 @@
-package kodlama.io.rentacar.business.dto.responses.get;
+package kodlama.io.rentacar.business.dto.responses.get.all;
 
 import kodlama.io.rentacar.entities.enums.State;
 import lombok.AllArgsConstructor;

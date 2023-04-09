@@ -4,7 +4,7 @@ import kodlama.io.rentacar.business.abstracts.ModelService;
 import kodlama.io.rentacar.business.dto.requests.create.CreateModelRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateModelRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateModelResponse;
-import kodlama.io.rentacar.business.dto.responses.get.GetAllModelsResponse;
+import kodlama.io.rentacar.business.dto.responses.get.all.GetAllModelsResponse;
 import kodlama.io.rentacar.business.dto.responses.get.GetModelResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateModelResponse;
 import kodlama.io.rentacar.entities.Model;
@@ -34,7 +34,7 @@ public class ModelManager implements ModelService {
 
     @Override
     public GetModelResponse getById(int id) {
-        checkIfExistsById(id);
+        checkIfModelExists(id);
         Model model = repository.findById(id).orElseThrow();
         GetModelResponse response = mapper.map(model, GetModelResponse.class);
         return response;
@@ -51,7 +51,7 @@ public class ModelManager implements ModelService {
 
     @Override
     public UpdateModelResponse update(int id, UpdateModelRequest request) {
-        checkIfExistsById(id);
+        checkIfModelExists(id);
         Model model = mapper.map(request, Model.class);
         model.setId(id);
         repository.save(model);
@@ -61,12 +61,12 @@ public class ModelManager implements ModelService {
 
     @Override
     public void delete(int id) {
-        checkIfExistsById(id);
+        checkIfModelExists(id);
         repository.deleteById(id);
     }
 
     // ! Business Rules
-    private void checkIfExistsById(int id){
+    private void checkIfModelExists(int id){
         if(!repository.existsById(id)){
             throw new RuntimeException("Böyle bir model bulunamadı!");
         }
