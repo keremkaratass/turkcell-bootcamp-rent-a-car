@@ -1,11 +1,14 @@
 package kodlama.io.rentacar.business.concretes;
 
 import kodlama.io.rentacar.business.abstracts.CarService;
+import kodlama.io.rentacar.business.abstracts.InvoiceService;
 import kodlama.io.rentacar.business.abstracts.PaymentService;
 import kodlama.io.rentacar.business.abstracts.RentalService;
+import kodlama.io.rentacar.business.dto.requests.create.CreateInvoiceRequest;
 import kodlama.io.rentacar.business.dto.requests.create.CreateRentalRequest;
 import kodlama.io.rentacar.business.dto.requests.update.UpdateRentalRequest;
 import kodlama.io.rentacar.business.dto.responses.create.CreateRentalResponse;
+import kodlama.io.rentacar.business.dto.responses.get.GetCarResponse;
 import kodlama.io.rentacar.business.dto.responses.get.GetRentalResponse;
 import kodlama.io.rentacar.business.dto.responses.get.all.GetAllRentalsResponse;
 import kodlama.io.rentacar.business.dto.responses.update.UpdateRentalResponse;
@@ -27,6 +30,8 @@ public class RentalManager implements RentalService {
     private final ModelMapper mapper;
     private final CarService carService;
     private final PaymentService paymentService;
+    private final InvoiceService invoiceService;
+
 
     @Override
     public List<GetAllRentalsResponse> getAll() {
@@ -43,7 +48,7 @@ public class RentalManager implements RentalService {
     public GetRentalResponse getById(int id) {
         checkIfRentalExists(id);
         Rental rental = repository.findById(id).orElseThrow();
-        GetRentalResponse response = mapper.map(rental,GetRentalResponse.class);
+        GetRentalResponse response = mapper.map(rental, GetRentalResponse.class);
 
         return response;
     }
@@ -56,6 +61,7 @@ public class RentalManager implements RentalService {
         rental.setTotalPrice(getTotalPrice(rental));
         rental.setStartDate(LocalDateTime.now());
 
+        //Payment
         CreateRentalPaymentRequest paymentRequest= new CreateRentalPaymentRequest();
         mapper.map(request.getPaymentRequest(), paymentRequest);
         paymentRequest.setPrice(getTotalPrice(rental));
@@ -64,6 +70,11 @@ public class RentalManager implements RentalService {
         repository.save(rental);
         carService.changeState(rental.getCar().getId(), State.RENTED);
         CreateRentalResponse response = mapper.map(rental, CreateRentalResponse.class);
+
+        // Invoice
+        CreateInvoiceRequest invoiceRequest = new CreateInvoiceRequest();
+        createInvoiceRequest(request, invoiceRequest, rental);
+        invoiceService.add(invoiceRequest);
 
         return response;
     }
@@ -102,5 +113,18 @@ public class RentalManager implements RentalService {
         if(!carService.getById(carId).getState().equals(State.AVAILABLE)){
             throw new RuntimeException("Araç müsait değil!");
         }
+    }
+
+    private void createInvoiceRequest(CreateRentalRequest request, CreateInvoiceRequest invoiceRequest, Rental rental) {
+        GetCarResponse car = carService.getById(request.getCarId());
+
+        invoiceRequest.setRentedAt(rental.getStartDate());
+        invoiceRequest.setModelName(car.getModelName());
+        invoiceRequest.setBrandName(car.getModelBrandName());
+        invoiceRequest.setDailyPrice(request.getDailyPrice());
+        invoiceRequest.setRentedForDays(request.getRentedForDays());
+        invoiceRequest.setCardHolder(request.getPaymentRequest().getCardHolder());
+        invoiceRequest.setPlate(car.getPlate());
+        invoiceRequest.setModelYear(car.getModelYear());
     }
 }
