@@ -22,6 +22,7 @@ public class Brand {
 
     private String name;
 
-    @OneToMany(mappedBy = "brand") //Modelde oluşturduğum brand ismi. mappedbyda ilişki sahibi olmayan yazılır. Yani ilişki sahibi model.
+    @OneToMany(mappedBy = "brand")
+    //Modelde oluşturduğum brand ismi. mappedbyda ilişki sahibi olmayan yazılır. Yani ilişki sahibi model.
     private List<Model> models;
 }
